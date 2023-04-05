@@ -29,8 +29,8 @@ def main():
         link = link_bs.get('href')
         if link is None: #no ==
             continue
-        elif link[0] == 'n' and link[1] == 'e' and link[2] == 'w' and link.count('/')==1:
-            all_links.append(link_bs['href'])
+        elif link[0] == 'n' and link[1] == 'e' and link[2] == 'w' and link.count('#')==0 and link.count('?')==0:
+            all_links.append('https://orenday.ru/'+link_bs['href'])
     print(all_links)
 
 
