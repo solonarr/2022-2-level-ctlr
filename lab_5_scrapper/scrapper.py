@@ -8,6 +8,7 @@ from pathlib import Path
 from core_utils.config_dto import ConfigDTO
 import datetime
 from core_utils.article.article import Article
+from core_utils.constants import CRAWLER_CONFIG_PATH
 
 
 class Config:
@@ -20,12 +21,14 @@ class Config:
         Initializes an instance of the Config class
         """
         self.path_to_config = path_to_config
-        Config(path_to_config=CRAWLER_CONFIG_PATH)
+        self._validate_config_content()
+        self._extract_config_content()
 
     def _extract_config_content(self) -> ConfigDTO:
         """
         Returns config values
         """
+        with open (self.path_to_config)
         pass
 
     def _validate_config_content(self) -> None:
