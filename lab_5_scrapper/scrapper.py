@@ -15,6 +15,13 @@ class Config:
     """
     Unpacks and validates configurations
     """
+    seed_urls: list[str]
+    total_articles_to_find_and_parse: int
+    headers: dict[str, str]
+    encoding: str
+    timeout: int
+    verify_certificate: bool
+    headless_mode: bool
 
     def __init__(self, path_to_config: Path) -> None:
         """
@@ -28,8 +35,10 @@ class Config:
         """
         Returns config values
         """
-        with open (self.path_to_config)
-        pass
+        with open (self.path_to_config, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        return ConfigDTO(**config)
+
 
     def _validate_config_content(self) -> None:
         """
@@ -42,43 +51,45 @@ class Config:
         """
         Retrieve seed urls
         """
-        pass
+        return self._extract_config_content().seed_urls
 
     def get_num_articles(self) -> int:
         """
         Retrieve total number of articles to scrape
         """
-        pass
+        return self._extract_config_content().total_articles_to_find_and_parse
+
 
     def get_headers(self) -> dict[str, str]:
         """
         Retrieve headers to use during requesting
         """
-        pass
+        return self._extract_config_content().headers
+
 
     def get_encoding(self) -> str:
         """
         Retrieve encoding to use during parsing
         """
-        pass
+        return self._extract_config_content().encoding
 
     def get_timeout(self) -> int:
         """
         Retrieve number of seconds to wait for response
         """
-        pass
+        return self._extract_config_content().timeout
 
     def get_verify_certificate(self) -> bool:
         """
         Retrieve whether to verify certificate
         """
-        pass
+        return self._extract_config_content().should_verify_certificate
 
     def get_headless_mode(self) -> bool:
         """
         Retrieve whether to use headless mode
         """
-        pass
+        return self._extract_config_content().headless_mode
 
 
 def make_request(url: str, config: Config) -> requests.models.Response:
@@ -86,7 +97,9 @@ def make_request(url: str, config: Config) -> requests.models.Response:
     Delivers a response from a request
     with given configuration
     """
-    pass
+    headers = config.get_headers()
+    response = requests.get(url, headers=headers)
+    return response
 
 
 class Crawler:
@@ -100,25 +113,36 @@ class Crawler:
         """
         Initializes an instance of the Crawler class
         """
-        pass
+        self.config = config
+        self.urls = []
 
     def _extract_url(self, article_bs: BeautifulSoup) -> str:
         """
         Finds and retrieves URL from HTML
         """
+       # self.make_request().text
+        #return article_bs.find_all('a')
+        for link_bs in self._extract_url():
+            link = link_bs.get('href')
         pass
 
     def find_articles(self) -> None:
         """
         Finds articles
         """
+        for link_bs in self._extract_url():
+            link = link_bs.get('href')
+            if link is None:  # no ==
+                continue
+            elif link[0] == 'n' and link[1] == 'e' and link[2] == 'w' and link.count('#') == 0 and link.count('?') == 0:
+                self.urls.append('https://orenday.ru/' + link_bs['href'])
         pass
 
     def get_search_urls(self) -> list:
         """
         Returns seed_urls param
         """
-        pass
+        return self.config._extract_config_content().seed_urls
 
 
 class HTMLParser:
@@ -130,12 +154,19 @@ class HTMLParser:
         """
         Initializes an instance of the HTMLParser class
         """
+        self.full_url = full_url
+        self.article_id = article_id
+        self.config = config
         pass
 
     def _fill_article_with_text(self, article_soup: BeautifulSoup) -> None:
         """
         Finds text of article
         """
+        article_text = main_bs.find('div', {'itemprop': 'articleBody'})
+        article_soup = article_text.find_all('p')
+        #for t in text_bs:
+            #print(t.text)
         pass
 
     def _fill_article_with_meta_information(self, article_soup: BeautifulSoup) -> None:
