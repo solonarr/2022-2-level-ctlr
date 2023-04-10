@@ -1,55 +1,43 @@
 """
 Crawler implementation
 """
+import datetime
+import json
+from pathlib import Path
 from typing import Pattern, Union
+from urllib.parse import urlparse
+
 import requests
 from bs4 import BeautifulSoup
-from pathlib import Path
-from core_utils.config_dto import ConfigDTO
-import datetime
+
 from core_utils.article.article import Article
-from core_utils.constants import CRAWLER_CONFIG_PATH
+from core_utils.article.io import to_meta, to_raw
+from core_utils.config_dto import ConfigDTO
+from core_utils.constants import (ASSETS_PATH, CRAWLER_CONFIG_PATH,
+                                  NUM_ARTICLES_UPPER_LIMIT,
+                                  TIMEOUT_LOWER_LIMIT, TIMEOUT_UPPER_LIMIT)
 
 class IncorrectSeedURLError(Exception):
-    """
-    Inappropriate value for seed url
-    """
+pass
 
 
 class NumberOfArticlesOutOfRangeError(Exception):
-    """
-    Number of articles either to large or small
-    """
-
+pass
 
 class IncorrectNumberOfArticlesError(Exception):
-    """
-    Inappropriate value for number of articles
-    """
-
+pass
 
 class IncorrectHeadersError(Exception):
-    """
-    Inappropriate value for headers
-    """
-
+pass
 
 class IncorrectEncodingError(Exception):
-    """
-    Inappropriate value for encoding
-    """
-
+pass
 
 class IncorrectTimeoutError(Exception):
-    """
-    Inappropriate value for timeout
-    """
-
+pass
 
 class IncorrectVerifyError(Exception):
-    """
-     Inappropriate value for certificate
-     """
+pass
 
 class Config:
     """
@@ -69,7 +57,14 @@ class Config:
         """
         self.path_to_config = path_to_config
         self._validate_config_content()
-        self._extract_config_content()
+        configDTO = self._extract_config_content()
+        self._seed_urls = configDTO.seed_urls
+        self._num_articles = configDTO.total_articles
+        self._headers = configDTO.headers
+        self._encoding = configDTO.encoding
+        self._timeout = configDTO.timeout
+        self._should_verify_certificate = configDTO.should_verify_certificate
+        self._headless_mode = configDTO.headless_mode
 
     def _extract_config_content(self) -> ConfigDTO:
         """
@@ -101,45 +96,45 @@ class Config:
         """
         Retrieve seed urls
         """
-        return self._extract_config_content().seed_urls
+        return configDTO.seed_urls
 
     def get_num_articles(self) -> int:
         """
         Retrieve total number of articles to scrape
         """
-        return self._extract_config_content().total_articles_to_find_and_parse
+        return configDTO.total_articles
 
 
     def get_headers(self) -> dict[str, str]:
         """
         Retrieve headers to use during requesting
         """
-        return self._extract_config_content().headers
+        return configDTO.headers
 
 
     def get_encoding(self) -> str:
         """
         Retrieve encoding to use during parsing
         """
-        return self._extract_config_content().encoding
+        return configDTO.encoding
 
     def get_timeout(self) -> int:
         """
         Retrieve number of seconds to wait for response
         """
-        return self._extract_config_content().timeout
+        return configDTO.timeout
 
     def get_verify_certificate(self) -> bool:
         """
         Retrieve whether to verify certificate
         """
-        return self._extract_config_content().should_verify_certificate
+        return configDTO.should_verify_certificate
 
     def get_headless_mode(self) -> bool:
         """
         Retrieve whether to use headless mode
         """
-        return self._extract_config_content().headless_mode
+        return configDTO.headless_mode
 
 
 def make_request(url: str, config: Config) -> requests.models.Response:
@@ -169,10 +164,9 @@ class Crawler:
         """
         Finds and retrieves URL from HTML
         """
-       # self.make_request().text
-        #return article_bs.find_all('a')
-        #for link_bs in self._extract_url():
+
         link = article_bs.get('href')
+        if (link is not None) and
         pass
 
     def find_articles(self) -> None:
