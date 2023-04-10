@@ -10,6 +10,46 @@ import datetime
 from core_utils.article.article import Article
 from core_utils.constants import CRAWLER_CONFIG_PATH
 
+class IncorrectSeedURLError(Exception):
+    """
+    Inappropriate value for seed url
+    """
+
+
+class NumberOfArticlesOutOfRangeError(Exception):
+    """
+    Number of articles either to large or small
+    """
+
+
+class IncorrectNumberOfArticlesError(Exception):
+    """
+    Inappropriate value for number of articles
+    """
+
+
+class IncorrectHeadersError(Exception):
+    """
+    Inappropriate value for headers
+    """
+
+
+class IncorrectEncodingError(Exception):
+    """
+    Inappropriate value for encoding
+    """
+
+
+class IncorrectTimeoutError(Exception):
+    """
+    Inappropriate value for timeout
+    """
+
+
+class IncorrectVerifyError(Exception):
+    """
+     Inappropriate value for certificate
+     """
 
 class Config:
     """
@@ -45,6 +85,16 @@ class Config:
         Ensure configuration parameters
         are not corrupt
         """
+        with open(self.path_to_config, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        seed_urls = config['seed_urls']
+        headers = config['headers']
+        total_articles_to_find_and_parse = config['total_articles_to_find_and_parse']
+        encoding = config['encoding']
+        timeout = config['timeout']
+        verify_certificate = config['should_verify_certificate']
+        headless_mode = config['headless_mode']
+
         pass
 
     def get_seed_urls(self) -> list[str]:
@@ -98,8 +148,7 @@ def make_request(url: str, config: Config) -> requests.models.Response:
     with given configuration
     """
     headers = config.get_headers()
-    response = requests.get(url, headers=headers)
-    return response
+    return  requests.get(url, headers=headers)
 
 
 class Crawler:
@@ -122,15 +171,15 @@ class Crawler:
         """
        # self.make_request().text
         #return article_bs.find_all('a')
-        for link_bs in self._extract_url():
-            link = link_bs.get('href')
+        #for link_bs in self._extract_url():
+        link = article_bs.get('href')
         pass
 
     def find_articles(self) -> None:
         """
         Finds articles
         """
-        for link_bs in self._extract_url():
+        for link_bs in self.config._extract_config_content().get_seed_urls:
             link = link_bs.get('href')
             if link is None:  # no ==
                 continue
@@ -142,7 +191,7 @@ class Crawler:
         """
         Returns seed_urls param
         """
-        return self.config._extract_config_content().seed_urls
+        return self.config._extract_config_content().get_seed_urls
 
 
 class HTMLParser:

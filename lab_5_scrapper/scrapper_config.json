@@ -1,5 +1,12 @@
 {
-    "seed_urls": "https://orenday.ru/news/",
+    "seed_urls": ["https://orenday.ru/news/",
+        "https://orenday.ru/news?page=2",
+        "https://orenday.ru/news?page=3",
+        "https://orenday.ru/news?page=4",
+        "https://orenday.ru/news?page=5",
+        "https://orenday.ru/news?page=6",
+        "https://orenday.ru/news?page=7"
+    ],
     "headers": {
          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
          "accept-language": "en-US,en;q=0.9,ru-RU;q=0.8,ru;q=0.7",
