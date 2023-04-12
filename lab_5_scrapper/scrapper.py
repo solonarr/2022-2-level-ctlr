@@ -7,7 +7,6 @@ import re
 import shutil
 from pathlib import Path
 from typing import Pattern, Union
-from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -18,6 +17,7 @@ from core_utils.config_dto import ConfigDTO
 from core_utils.constants import (ASSETS_PATH, CRAWLER_CONFIG_PATH,
                                   NUM_ARTICLES_UPPER_LIMIT,
                                   TIMEOUT_LOWER_LIMIT, TIMEOUT_UPPER_LIMIT)
+
 
 class IncorrectSeedURLError(Exception):
     """
@@ -60,6 +60,7 @@ class IncorrectVerifyError(Exception):
     Validates the verify attribute
     """
 
+
 class Config:
     """
     Unpacks and validates configurations
@@ -91,10 +92,9 @@ class Config:
         """
         Returns config values
         """
-        with open (self.path_to_config, 'r', encoding='utf-8') as f:
+        with open(self.path_to_config, 'r', encoding='utf-8') as f:
             config = json.load(f)
         return ConfigDTO(**config)
-
 
     def _validate_config_content(self) -> None:
         """
@@ -110,13 +110,13 @@ class Config:
             if not isinstance(url, str) or not re.match(r'https?://.*/', url):
                 raise IncorrectSeedURLError
 
-        if config_dto.total_articles > NUM_ARTICLES_UPPER_LIMIT:
-            raise NumberOfArticlesOutOfRangeError
-
         if (not isinstance(config_dto.total_articles, int)
                 or isinstance(config_dto.total_articles, bool)
-                or config_dto.total_articles <= 0):
+                or config_dto.total_articles < 1):
             raise IncorrectNumberOfArticlesError
+
+        if config_dto.total_articles > NUM_ARTICLES_UPPER_LIMIT:
+            raise NumberOfArticlesOutOfRangeError
 
         if not isinstance(config_dto.headers, dict):
             raise IncorrectHeadersError
@@ -144,13 +144,11 @@ class Config:
         """
         return self._num_articles
 
-
     def get_headers(self) -> dict[str, str]:
         """
         Retrieve headers to use during requesting
         """
         return self._headers
-
 
     def get_encoding(self) -> str:
         """
@@ -189,6 +187,7 @@ def make_request(url: str, config: Config) -> requests.models.Response:
     response.encoding = 'utf-8'
     return response
 
+
 class Crawler:
     """
     Crawler implementation
@@ -213,7 +212,6 @@ class Crawler:
         if isinstance(url, str):
             return url
         return ''
-
 
     def find_articles(self) -> None:
         """
@@ -256,7 +254,6 @@ class HTMLParser:
         text_bs = article_text.find_all('p')
         for t in text_bs:
             self.article.text += t.text
-
 
     def _fill_article_with_meta_information(self, article_soup: BeautifulSoup) -> None:
         """
