@@ -18,26 +18,25 @@ from core_utils.constants import (ASSETS_PATH, CRAWLER_CONFIG_PATH,
                                   TIMEOUT_LOWER_LIMIT, TIMEOUT_UPPER_LIMIT)
 
 class IncorrectSeedURLError(Exception):
-pass
-
+    pass
 
 class NumberOfArticlesOutOfRangeError(Exception):
-pass
+    pass
 
 class IncorrectNumberOfArticlesError(Exception):
-pass
+    pass
 
 class IncorrectHeadersError(Exception):
-pass
+    pass
 
 class IncorrectEncodingError(Exception):
-pass
+    pass
 
 class IncorrectTimeoutError(Exception):
-pass
+    pass
 
 class IncorrectVerifyError(Exception):
-pass
+    pass
 
 class Config:
     """
@@ -57,14 +56,14 @@ class Config:
         """
         self.path_to_config = path_to_config
         self._validate_config_content()
-        configDTO = self._extract_config_content()
-        self._seed_urls = configDTO.seed_urls
-        self._num_articles = configDTO.total_articles
-        self._headers = configDTO.headers
-        self._encoding = configDTO.encoding
-        self._timeout = configDTO.timeout
-        self._should_verify_certificate = configDTO.should_verify_certificate
-        self._headless_mode = configDTO.headless_mode
+        configdto = self._extract_config_content()
+        self._seed_urls = configdto.seed_urls
+        self._num_articles = configdto.total_articles
+        self._headers = configdto.headers
+        self._encoding = configdto.encoding
+        self._timeout = configdto.timeout
+        self._should_verify_certificate = configdto.should_verify_certificate
+        self._headless_mode = configdto.headless_mode
 
     def _extract_config_content(self) -> ConfigDTO:
         """
@@ -80,61 +79,75 @@ class Config:
         Ensure configuration parameters
         are not corrupt
         """
-        with open(self.path_to_config, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        seed_urls = config['seed_urls']
-        headers = config['headers']
-        total_articles_to_find_and_parse = config['total_articles_to_find_and_parse']
-        encoding = config['encoding']
-        timeout = config['timeout']
-        verify_certificate = config['should_verify_certificate']
-        headless_mode = config['headless_mode']
 
-        pass
+        if not isinstance(self._seed_urls, list):
+            raise IncorrectSeedURLError
+
+        for url in self._seed_urls:
+            if not isinstance(url, str) or not re.match(r'https?://.*/', url):
+                raise IncorrectSeedURLError
+
+        if self._num_articles > NUM_ARTICLES_UPPER_LIMIT:
+            raise NumberOfArticlesOutOfRangeError
+
+        if not isinstance(self._num_articles, int) or self._num_articles < 1:
+            raise IncorrectNumberOfArticlesError
+
+        if not isinstance(self._headers, dict):
+            raise IncorrectHeadersError
+
+        if not isinstance(self._encoding, str):
+            raise IncorrectEncodingError
+
+        if self._timeout > TIMEOUT_UPPER_LIMIT:
+            raise IncorrectTimeoutError
+
+        if not isinstance(self._should_verify_certificate, bool):
+            raise IncorrectVerifyError
 
     def get_seed_urls(self) -> list[str]:
         """
         Retrieve seed urls
         """
-        return configDTO.seed_urls
+        return self._seed_urls
 
     def get_num_articles(self) -> int:
         """
         Retrieve total number of articles to scrape
         """
-        return configDTO.total_articles
+        return self._num_articles
 
 
     def get_headers(self) -> dict[str, str]:
         """
         Retrieve headers to use during requesting
         """
-        return configDTO.headers
+        return self._headers
 
 
     def get_encoding(self) -> str:
         """
         Retrieve encoding to use during parsing
         """
-        return configDTO.encoding
+        return self._encoding
 
     def get_timeout(self) -> int:
         """
         Retrieve number of seconds to wait for response
         """
-        return configDTO.timeout
+        return self._timeout
 
     def get_verify_certificate(self) -> bool:
         """
         Retrieve whether to verify certificate
         """
-        return configDTO.should_verify_certificate
+        return self._should_verify_certificate
 
     def get_headless_mode(self) -> bool:
         """
         Retrieve whether to use headless mode
         """
-        return configDTO.headless_mode
+        return self._headless_mode
 
 
 def make_request(url: str, config: Config) -> requests.models.Response:
@@ -167,7 +180,7 @@ class Crawler:
 
         link = article_bs.get('href')
         if (link is not None) and
-        pass
+
 
     def find_articles(self) -> None:
         """
