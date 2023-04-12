@@ -20,25 +20,45 @@ from core_utils.constants import (ASSETS_PATH, CRAWLER_CONFIG_PATH,
                                   TIMEOUT_LOWER_LIMIT, TIMEOUT_UPPER_LIMIT)
 
 class IncorrectSeedURLError(Exception):
-    pass
+    """
+    Validates a seed url format
+    """
+
 
 class NumberOfArticlesOutOfRangeError(Exception):
-    pass
+    """
+    Validates the number of articles within the necessary range
+    """
+
 
 class IncorrectNumberOfArticlesError(Exception):
-    pass
+    """
+    Validates the type of number of articles
+    """
+
 
 class IncorrectHeadersError(Exception):
-    pass
+    """
+    Validates the type of header
+    """
+
 
 class IncorrectEncodingError(Exception):
-    pass
+    """
+    Validates the type of encoding
+    """
+
 
 class IncorrectTimeoutError(Exception):
-    pass
+    """
+    Validates timeout
+    """
+
 
 class IncorrectVerifyError(Exception):
-    pass
+    """
+    Validates the verify attribute
+    """
 
 class Config:
     """
@@ -93,7 +113,9 @@ class Config:
         if config_dto.total_articles > NUM_ARTICLES_UPPER_LIMIT:
             raise NumberOfArticlesOutOfRangeError
 
-        if not isinstance(config_dto.total_articles, int) or config_dto.total_articles < 1:
+        if (not isinstance(config_dto.total_articles, int)
+                or isinstance(config_dto.total_articles, bool)
+                or config_dto.total_articles <= 0):
             raise IncorrectNumberOfArticlesError
 
         if not isinstance(config_dto.headers, dict):
@@ -102,10 +124,12 @@ class Config:
         if not isinstance(config_dto.encoding, str):
             raise IncorrectEncodingError
 
-        if config_dto.timeout > TIMEOUT_UPPER_LIMIT:
+        if (not isinstance(config_dto.timeout, int)
+                or config_dto.timeout < TIMEOUT_LOWER_LIMIT
+                or config_dto.timeout > TIMEOUT_UPPER_LIMIT):
             raise IncorrectTimeoutError
 
-        if not isinstance(config_dto.should_verify_certificate, bool):
+        if not isinstance(config_dto.should_verify_certificate, bool) or not isinstance(config_dto.headless_mode, bool):
             raise IncorrectVerifyError
 
     def get_seed_urls(self) -> list[str]:
@@ -222,17 +246,17 @@ class HTMLParser:
         self.full_url = full_url
         self.article_id = article_id
         self.config = config
-        pass
+        self.article = Article(self.full_url, self.article_id)
 
     def _fill_article_with_text(self, article_soup: BeautifulSoup) -> None:
         """
         Finds text of article
         """
-        article_text = main_bs.find('div', {'itemprop': 'articleBody'})
-        article_soup = article_text.find_all('p')
-        #for t in text_bs:
-            #print(t.text)
-        pass
+        article_text = article_soup.find('div', {'itemprop': 'articleBody'})
+        text_bs = article_text.find_all('p')
+        for t in text_bs:
+            self.article.text += t.text
+
 
     def _fill_article_with_meta_information(self, article_soup: BeautifulSoup) -> None:
         """
@@ -250,7 +274,11 @@ class HTMLParser:
         """
         Parses each article
         """
-        pass
+        page = make_request(self.full_url, self.config)
+        articles = BeautifulSoup(page.content, "lxml")
+        self._fill_article_with_text(articles)
+        self._fill_article_with_meta_information(articles)
+        return self.article
 
 
 def prepare_environment(base_path: Union[Path, str]) -> None:
@@ -266,7 +294,15 @@ def main() -> None:
     """
     Entrypoint for scrapper module
     """
-    pass
+    config = Config(path_to_config=CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+    crawler = Crawler(config=config)
+    crawler.find_articles()
+    for idx, url in enumerate(crawler.urls):
+        parser = HTMLParser(full_url=url, article_id=idx + 1, config=config)
+        text = parser.parse()
+        if isinstance(text, Article):
+            to_raw(text)
 
 
 if __name__ == "__main__":
