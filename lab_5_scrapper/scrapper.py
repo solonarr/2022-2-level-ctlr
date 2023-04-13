@@ -208,10 +208,10 @@ class Crawler:
         Finds and retrieves URL from HTML
         """
 
-        url = article_bs['href']
+        url = article_bs.get('href')
         if isinstance(url, str):
             return url
-        return url[0]
+        return ''
 
     def find_articles(self) -> None:
         """
@@ -250,7 +250,6 @@ class HTMLParser:
         """
         Finds text of article
         """
-        # article_text = article_soup.find('div', {'itemprop': 'articleBody'})
         text_bs = article_soup.find_all('p')
         for t in text_bs:
             self.article.text += t.text
