@@ -5,7 +5,9 @@
         "https://orenday.ru/news?page=4",
         "https://orenday.ru/news?page=5",
         "https://orenday.ru/news?page=6",
-        "https://orenday.ru/news?page=7"
+        "https://orenday.ru/news?page=7",
+        "https://orenday.ru/news?page=8",
+        "https://orenday.ru/news?page=9"
     ],
     "headers": {
          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",

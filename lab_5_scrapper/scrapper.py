@@ -12,7 +12,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from core_utils.article.article import Article
-from core_utils.article.io import to_raw
+from core_utils.article.io import to_meta, to_raw
 from core_utils.config_dto import ConfigDTO
 from core_utils.constants import (ASSETS_PATH, CRAWLER_CONFIG_PATH,
                                   NUM_ARTICLES_UPPER_LIMIT,
@@ -208,10 +208,10 @@ class Crawler:
         Finds and retrieves URL from HTML
         """
 
-        url = article_bs.get('href')
+        url = article_bs['href']
         if isinstance(url, str):
             return url
-        return ''
+        return url[0]
 
     def find_articles(self) -> None:
         """
@@ -250,8 +250,8 @@ class HTMLParser:
         """
         Finds text of article
         """
-        article_text = article_soup.find('div', {'itemprop': 'articleBody'})
-        text_bs = article_text.find_all('p')
+        # article_text = article_soup.find('div', {'itemprop': 'articleBody'})
+        text_bs = article_soup.find_all('p')
         for t in text_bs:
             self.article.text += t.text
 
@@ -259,7 +259,18 @@ class HTMLParser:
         """
         Finds meta information of article
         """
-        pass
+        title = article_soup.find_all('h2')
+        if not title:
+            self.article.title = 'WITHOUT TITLE'
+        else:
+            self.article.title = title[0].text
+
+        author_name = article_soup.find('div', {'class': 'fright'})
+        authors = author_name.find('a', {'rel': 'author'})
+        if not authors:
+            self.article.author = ['NOT FOUND']
+        else:
+            self.article.author = [name.text for name in authors]
 
     def unify_date_format(self, date_str: str) -> datetime.datetime:
         """
@@ -300,6 +311,7 @@ def main() -> None:
         text = parser.parse()
         if isinstance(text, Article):
             to_raw(text)
+            to_meta(text)
 
 
 if __name__ == "__main__":
