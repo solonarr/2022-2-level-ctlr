@@ -3,9 +3,23 @@ Pipeline for CONLL-U formatting
 """
 from pathlib import Path
 from typing import List
+import os
 
 from core_utils.article.article import SentenceProtocol
 from core_utils.article.ud import OpencorporaTagProtocol, TagConverter
+from core_utils.constants import ASSETS_PATH
+
+class FileNotFoundError(Exception):
+    pass
+
+class NotADirectoryError(Exception):
+    pass
+
+class InconsistentDatasetError(Exception):
+    pass
+
+class EmptyDirectoryError(Exception):
+    pass
 
 
 # pylint: disable=too-few-public-methods
@@ -18,11 +32,28 @@ class CorpusManager:
         """
         Initializes CorpusManager
         """
+        self._storage = {}
+        self.path_to_raw_txt_data = path_to_raw_txt_data
+        self._validate_dataset()
 
     def _validate_dataset(self) -> None:
         """
         Validates folder with assets
         """
+        if not self._path_to_raw_txt_data.exists():
+            raise FileNotFoundError
+
+        if not os.scandir(self.path_to_raw_txt_data):
+            raise EmptyDirectoryError
+
+        if 
+
+
+
+
+
+
+
 
     def _scan_dataset(self) -> None:
         """
@@ -181,6 +212,8 @@ def main() -> None:
     """
     Entrypoint for pipeline module
     """
+    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
+
 
 
 if __name__ == "__main__":
