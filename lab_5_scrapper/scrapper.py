@@ -258,11 +258,11 @@ class HTMLParser:
         """
         Finds meta information of article
         """
-        title = article_soup.find_all('h2')
+        title = article_soup.find('h1', {'class': 'title-news'})
         if not title:
             self.article.title = 'WITHOUT TITLE'
         else:
-            self.article.title = title[0].text
+            self.article.title = title.text
 
         author_name = article_soup.find('div', {'class': 'fright'})
         authors = author_name.find('a', {'rel': 'author'})

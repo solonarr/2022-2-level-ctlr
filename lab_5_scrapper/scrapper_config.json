@@ -17,7 +17,7 @@
          "sec-ch-ua-mobile": "?0",
          "cookie": "bsys_num_11=0; bsys_num_21=0; bsys_num_26=0; bsys_num_22=0; bsys_num_30=0; bsys_num_23=0; bsys_num_24=0; bsys_num_25=0; bsys_num_33=0; bsys_num_27=0; _ym_uid=1679040980418924447; _ym_d=1679040980; tmr_vid_5756=1; SN5794b51b824ab=6n73lfhnbt3kv36raj3tgs3n51; _ym_isad=2; bsys_num_37=0; bsys_num_19=0; bsys_num_13=0; bsys_num_20=0; bsys_num_31=0; bsys_num_32=0; bsys_num_34=0; bsys_num_36=0; bsys_num_35=0; bsys_num_16=0; bsys_num_17=0; bsys_num_18=0; bsys_num_33=0; bsys_num_38=0"
     },
-    "total_articles_to_find_and_parse": 10,
+    "total_articles_to_find_and_parse": 5,
     "encoding": "utf-8",
     "timeout": 10,
     "should_verify_certificate": true,
