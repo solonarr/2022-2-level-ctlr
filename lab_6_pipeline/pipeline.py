@@ -5,18 +5,10 @@ from pathlib import Path
 from typing import List
 import re
 
-from core_utils.article.article import SentenceProtocol
+from core_utils.article.article import SentenceProtocol, split_by_sentence
 from core_utils.article.io import from_raw, to_cleaned
 from core_utils.article.ud import OpencorporaTagProtocol, TagConverter
 from core_utils.constants import ASSETS_PATH
-
-
-class FileNotFoundError(Exception):
-    pass
-
-
-class NotADirectoryError(Exception):
-    pass
 
 
 class InconsistentDatasetError(Exception):
@@ -88,6 +80,9 @@ class MorphologicalTokenDTO:
         """
         Initializes MorphologicalTokenDTO
         """
+        self.lemma = lemma
+        self.pos = pos
+        self.tags = tags
 
 
 class ConlluToken:
@@ -145,6 +140,12 @@ class ConlluSentence(SentenceProtocol):
         """
         Returns the lowercase representation of the sentence
         """
+        sentence_list = []
+        for token in self._tokens:
+            cleaned_token = token.get_cleaned()
+            if cleaned_token:
+                sentence_list.append(cleaned_token)
+        return ' '.join(sentence_list)
 
     def get_tokens(self) -> list[ConlluToken]:
         """
@@ -200,11 +201,23 @@ class MorphologicalAnalysisPipeline:
         """
         Returns the text representation as the list of ConlluSentence
         """
+        sentences = split_by_sentence(text)
+        conllu_sentences = []
+        for idx, sent in enumerate(sentences, 1):
+            wordlist = sent.split()
+            conllu_wordlist = [ConlluToken(txt) for txt in wordlist]
+            conllu_sentences.append(ConlluSentence(idx, sent, conllu_wordlist))
+        return conllu_sentences
 
     def run(self) -> None:
         """
         Performs basic preprocessing and writes processed text to files
         """
+        articles = self._corpus.get_articles()
+        for id in articles:
+            sentences = self._process(articles[id].text)
+            articles[id].set_conllu_sentences(sentences)
+            to_cleaned(articles[id])
 
 
 class AdvancedMorphologicalAnalysisPipeline(MorphologicalAnalysisPipeline):
@@ -232,10 +245,9 @@ def main() -> None:
     """
     Entrypoint for pipeline module
     """
-    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
-    storage = corpus_manager.get_articles()
-    for idx, article in storage.items():
-        pass
+    corpus_manager = CorpusManager(ASSETS_PATH)
+    pipeline = MorphologicalAnalysisPipeline(corpus_manager)
+    pipeline.run()
 
 
 if __name__ == "__main__":
