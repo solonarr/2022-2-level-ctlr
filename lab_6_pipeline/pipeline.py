@@ -12,11 +12,15 @@ from core_utils.constants import ASSETS_PATH
 
 
 class InconsistentDatasetError(Exception):
-    pass
+    """
+    IDs contain slips, number of meta and raw files is not equal, files are empty
+    """
 
 
 class EmptyDirectoryError(Exception):
-    pass
+    """
+    directory is empty
+    """
 
 # pylint: disable=too-few-public-methods
 
@@ -30,37 +34,38 @@ class CorpusManager:
         """
         Initializes CorpusManager
         """
-        self._storage = {}
-        self._path_to_raw_txt_data = path_to_raw_txt_data
+        self.path_to_raw_txt_data = path_to_raw_txt_data
         self._validate_dataset()
+        self._storage = {}
         self._scan_dataset()
 
     def _validate_dataset(self) -> None:
         """
         Validates folder with assets
         """
-        if not self._path_to_raw_txt_data.exists():
+        if not self.path_to_raw_txt_data.exists():
             raise FileNotFoundError
 
-        if not self._path_to_raw_txt_data.is_dir():
+        if not self.path_to_raw_txt_data.is_dir():
             raise NotADirectoryError
 
-        meta_files = [file for file in self._path_to_raw_txt_data.glob('*.json')]
-        raw_files = [file for file in self._path_to_raw_txt_data.glob('*.txt')]
+        if not [x for x in self.path_to_raw_txt_data.iterdir()]:
+            raise EmptyDirectoryError
+
+        meta_files = [file for file in self.path_to_raw_txt_data.glob('*.json')]
+        raw_files = [file for file in self.path_to_raw_txt_data.glob('*.txt')]
         if not (meta_files and raw_files):
             raise InconsistentDatasetError
 
         if len(meta_files) != len(raw_files):
             raise InconsistentDatasetError
 
-        if not any(self._path_to_raw_txt_data.iterdir()):
-            raise EmptyDirectoryError
 
     def _scan_dataset(self) -> None:
         """
         Register each dataset entry
         """
-        for f in self._path_to_raw_txt_data.glob('*.txt'):
+        for f in self.path_to_raw_txt_data.glob('*.txt'):
             article = from_raw(f)
             self._storage.update({article.article_id: article})
 
@@ -80,9 +85,6 @@ class MorphologicalTokenDTO:
         """
         Initializes MorphologicalTokenDTO
         """
-        self.lemma = lemma
-        self.pos = pos
-        self.tags = tags
 
 
 class ConlluToken:
@@ -204,8 +206,8 @@ class MorphologicalAnalysisPipeline:
         sentences = split_by_sentence(text)
         conllu_sentences = []
         for idx, sent in enumerate(sentences, 1):
-            wordlist = sent.split()
-            conllu_wordlist = [ConlluToken(txt) for txt in wordlist]
+            word_list = sent.split()
+            conllu_wordlist = [ConlluToken(txt) for txt in word_list]
             conllu_sentences.append(ConlluSentence(idx, sent, conllu_wordlist))
         return conllu_sentences
 
@@ -213,11 +215,10 @@ class MorphologicalAnalysisPipeline:
         """
         Performs basic preprocessing and writes processed text to files
         """
-        articles = self._corpus.get_articles()
-        for id in articles:
-            sentences = self._process(articles[id].text)
-            articles[id].set_conllu_sentences(sentences)
-            to_cleaned(articles[id])
+        for article in self._corpus.get_articles().values():
+            sentences = self._process(article.text)
+            article.set_conllu_sentences(sentences)
+            to_cleaned(article)
 
 
 class AdvancedMorphologicalAnalysisPipeline(MorphologicalAnalysisPipeline):
