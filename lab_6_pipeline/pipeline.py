@@ -52,13 +52,13 @@ class CorpusManager:
         if not [x for x in self.path_to_raw_txt_data.iterdir()]:
             raise EmptyDirectoryError
 
-        meta_files = [file for file in self.path_to_raw_txt_data.glob(r'\d+_meta.json')]
-        raw_files = [file for file in self.path_to_raw_txt_data.glob(r'\d+_raw.txt')]
+        meta_files = [file for file in self.path_to_raw_txt_data.glob(r'*_meta.json')]
+        raw_files = [file for file in self.path_to_raw_txt_data.glob(r'*_raw.txt')]
 
         if len(meta_files) != len(raw_files):
             raise InconsistentDatasetError
 
-        if sorted([int(file.stem.split("_")[0]) for file in raw_files]) != list(range(1, len(raw_files) + 1)):
+        if sorted([int(re.search(r'\d+', file.stem)[0]) for file in raw_files]) != list(range(1, len(raw_files) + 1)):
             raise InconsistentDatasetError
 
         for file in raw_files:
