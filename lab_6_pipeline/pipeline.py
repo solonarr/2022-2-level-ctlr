@@ -55,8 +55,8 @@ class CorpusManager:
         meta_files = [file for file in self.path_to_raw_txt_data.iterdir() if file.suffix == ".json" and file.stem.endswith("_meta")]
         raw_files = [file for file in self.path_to_raw_txt_data.iterdir() if file.suffix == ".txt" and file.stem.endswith("_raw")]
 
-        if len(meta_files) != len(raw_files):
-            raise InconsistentDatasetError
+        # if len(meta_files) != len(raw_files):
+        # raise InconsistentDatasetError
 
         if sorted([int(re.match(r'\d+', file.name)[0]) for file in raw_files]) != list(range(1, len(raw_files) + 1)):
             raise InconsistentDatasetError
@@ -70,8 +70,8 @@ class CorpusManager:
         Register each dataset entry
         """
         for f in self.path_to_raw_txt_data.glob('*.txt'):
-            article = from_raw(f)
-            self._storage.update({article.article_id: article})
+            if article := re.search(r'(\d+)_raw', str(f)):
+                self._storage[int(article[1])] = from_raw(f)
 
     def get_articles(self) -> dict:
         """
