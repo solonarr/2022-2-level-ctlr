@@ -58,7 +58,7 @@ class CorpusManager:
         if len(meta_files) != len(raw_files):
             raise InconsistentDatasetError
 
-        if sorted([int(re.match(r'\d+', file.stem)[0]) for file in raw_files]) != list(range(1, len(raw_files) + 1)):
+        if sorted([int(re.match(r'\d+', file.name)[0]) for file in raw_files]) != list(range(1, len(raw_files) + 1)):
             raise InconsistentDatasetError
 
         for file in raw_files:
