@@ -69,9 +69,9 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        for f in self.path_to_raw_txt_data.glob('*.txt'):
-            if article := re.search(r'(\d+)_raw', str(f)):
-                self._storage[int(article[1])] = from_raw(f)
+        for f in self.path_to_raw_txt_data.glob('*_raw.txt'):
+            article = from_raw(f)
+            self._storage.update({article.article_id: article})
 
     def get_articles(self) -> dict:
         """
