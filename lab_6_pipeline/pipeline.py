@@ -60,8 +60,8 @@ class CorpusManager:
         if sorted([int(file.stem.split("_")[0]) for file in raw_files]) != list(range(1, len(raw_files) + 1)):
             raise InconsistentDatasetError
 
-        for files in raw_files:
-            if not all(i.stat().st_size for i in files):
+        for file in raw_files:
+            if file.stat().st_size == 0:
                 raise InconsistentDatasetError
 
     def _scan_dataset(self) -> None:
